@@ -43,7 +43,9 @@ function App() {
           <TabList 
             files={defaultFiles}
             activeId="1"
+            unsaveIds={['1', '2']}
             onTabClick={(id) => {console.log(id)}}
+            onCloseTab={(id) => {console.log('closing', id)}}
           />
         </div>
       </div>
