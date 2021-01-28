@@ -52,6 +52,9 @@ function App() {
           <SimpleMDE 
             value={defaultFiles[2].body}
             onChange={(value) => {console.log(value)}}
+            options={{
+              minHeight: '515px'
+            }}
           />
         </div>
       </div>
