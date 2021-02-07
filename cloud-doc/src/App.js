@@ -15,22 +15,85 @@ function App() {
   const [activeFileID, setActiveFileID] = useState('')
   const [openedFileIDs, setOpenedFileIDs] = useState([])
   const [unsavedFileIDs, setUnsavedFileIDs] = useState([])
+  const [searchedFiles, setSearchedFiles] = useState([]) 
   const openedFiles = openedFileIDs.map(openID => {
     return files.find(file => file.id === openID)
   })
+  const fileClick = (fileID) => {
+    // set current active file
+    setActiveFileID(fileID)
+    // if openedFiles don't have the current ID
+    // then add new fileID to openedFiles
+    if (!openedFileIDs.includes(fileID)) {
+      setOpenedFileIDs([...openedFileIDs, fileID])
+    }
+  }
+  const tabClick = (fileID) => {
+    // set current active file
+    setActiveFileID(fileID)
+  }
+  const tabClose = (id) => {
+    // remove current id from openedFileIDs
+    const tabWithout = openedFileIDs.filter(fileID => fileID !== id)
+    setOpenedFileIDs(tabWithout)
+    // set the active to the first opened tab if still tabs left
+    if (tabWithout.length > 0) {
+      setActiveFileID(tabWithout[0])
+    } else {
+      setActiveFileID('')
+    }
+  }
+  const fileChange = (id, value) => {
+    // loop through file array update to new value
+    const newFiles = files.map(file => {
+      if (file.id === id) {
+        file.body = value
+      }
+      return file
+    })
+    setFiles(newFiles)
+    // update unsavedIDs
+    if (!unsavedFileIDs.includes(id)) {
+      setUnsavedFileIDs([...unsavedFileIDs, id])
+    }
+  }
+  const deleteFile = (id) => {
+    // filter out the current file id
+    const newFiles = files.filter(file => file.id !== id)
+    setFiles(newFiles)
+    // close the tab if opened
+    tabClose(id)
+  }
+  const updateFileName = (id, title) => {
+    // loop through files, and update the title
+    const newFiles = files.map(file => {
+      if (file.id === id) {
+        file.title = title
+      }
+      return file
+    })
+    setFiles(newFiles)
+  }
+  const fileSearch = (keyword) => {
+    // filter out the new files based on the keyword
+    const newFiles = files.filter(file => file.title.includes(keyword))
+    console.log(newFiles)
+    setSearchedFiles(newFiles)
+  }
   const activeFile = files.find(file => file.id === activeFileID)
+  const fileListArr = (searchedFiles.length > 0) ? searchedFiles : files
   return (
     <div className="App container-fluid px-0">
       <div className="row no-gutters">
         <div className="col-3 left-panel">
           <FileSearch
-            onFileSearch={(value) => { console.log(value) }}
+            onFileSearch={fileSearch}
           />
           <FileList 
-            files={files}
-            onFileClick={(id) => { console.log(id) }}
-            onFileDelete={(id) => { console.log('deleting', id) }}
-            onSaveEdit={(id, newValue) => { console.log(id, newValue) }}
+            files={fileListArr}
+            onFileClick={fileClick}
+            onFileDelete={deleteFile}
+            onSaveEdit={updateFileName}
           />
           <div className="row no-gutters button-group">
             <div className="col">
@@ -61,12 +124,13 @@ function App() {
                 files={openedFiles}
                 activeId={activeFileID}
                 unsaveIds={unsavedFileIDs}
-                onTabClick={(id) => {console.log(id)}}
-                onCloseTab={(id) => {console.log('closing', id)}}
+                onTabClick={tabClick}
+                onCloseTab={tabClose}
               />
               <SimpleMDE 
+                key={activeFile && activeFile.id}
                 value={activeFile && activeFile.body}
-                onChange={(value) => {console.log(value)}}
+                onChange={(value) => {fileChange(activeFile.id, value)}}
                 options={{
                   minHeight: '515px'
                 }}
