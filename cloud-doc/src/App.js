@@ -8,19 +8,21 @@ import FileList from './components/FileList'
 import BottomBtn from './components/BottomBtn'
 import TabList from './components/TabList'
 import defaultFiles from './utils/defaultFiles'
+import { flattenArr, objToArr } from './utils/helper'
+
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import "easymde/dist/easymde.min.css"
 
 function App() {
-  const [files, setFiles] = useState(defaultFiles)
+  const [files, setFiles] = useState(flattenArr(defaultFiles))
+  console.log(files)
   const [activeFileID, setActiveFileID] = useState('')
   const [openedFileIDs, setOpenedFileIDs] = useState([])
   const [unsavedFileIDs, setUnsavedFileIDs] = useState([])
   const [searchedFiles, setSearchedFiles] = useState([]) 
-  const openedFiles = openedFileIDs.map(openID => {
-    return files.find(file => file.id === openID)
-  })
+  const filesArr = objToArr(files)
+  console.log(filesArr)
   const fileClick = (fileID) => {
     // set current active file
     setActiveFileID(fileID)
@@ -46,14 +48,8 @@ function App() {
     }
   }
   const fileChange = (id, value) => {
-    // loop through file array update to new value
-    const newFiles = files.map(file => {
-      if (file.id === id) {
-        file.body = value
-      }
-      return file
-    })
-    setFiles(newFiles)
+    const newFile = {...files[id], body: value}
+    setFiles({...files, [id]: newFile})
     // update unsavedIDs
     if (!unsavedFileIDs.includes(id)) {
       setUnsavedFileIDs([...unsavedFileIDs, id])
@@ -61,44 +57,37 @@ function App() {
   }
   const deleteFile = (id) => {
     // filter out the current file id
-    const newFiles = files.filter(file => file.id !== id)
-    setFiles(newFiles)
+    delete files[id]
+    setFiles(files)
     // close the tab if opened
     tabClose(id)
   }
   const updateFileName = (id, title) => {
-    // loop through files, and update the title
-    const newFiles = files.map(file => {
-      if (file.id === id) {
-        file.title = title
-        file.isNew = false
-      }
-      return file
-    })
-    setFiles(newFiles)
+    const modifiedFile = {...files[id], title, isNew: false}
+    setFiles({...files, [id]: modifiedFile})
   }
   const fileSearch = (keyword) => {
     // filter out the new files based on the keyword
-    const newFiles = files.filter(file => file.title.includes(keyword))
+    const newFiles = filesArr.filter(file => file.title.includes(keyword))
     console.log(newFiles)
     setSearchedFiles(newFiles)
   }
   const createNewFile = () => {
     const newID = uuidv4()
-    const newFiles = [
-      ...files,
-      {
-        id: newID,
-        title: '',
-        body: '## 请输入 Markdown',
-        createdAt: new Date().getTime(),
-        isNew: true
-      }
-    ]
-    setFiles(newFiles)
+    const newFile = {
+      id: newID,
+      title: '',
+      body: '## 请输入 Markdown',
+      createdAt: new Date().getTime(),
+      isNew: true
+    }
+    setFiles({...files, [newID]: newFile})
   }
-  const activeFile = files.find(file => file.id === activeFileID)
-  const fileListArr = (searchedFiles.length > 0) ? searchedFiles : files
+  const activeFile = files[activeFileID]
+  const openedFiles = openedFileIDs.map(openID => {
+    return files[openID]
+  })
+  const fileListArr = (searchedFiles.length > 0) ? searchedFiles : filesArr
   return (
     <div className="App container-fluid px-0">
       <div className="row no-gutters">
