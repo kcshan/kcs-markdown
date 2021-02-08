@@ -7,7 +7,7 @@ app.on('ready', () => {
   require('devtron').install()
   
   mainWindow = new BrowserWindow({
-    width: 1024,
+    width: 1600,
     height: 680,
     webPreferences: {
       nodeIntegration: true

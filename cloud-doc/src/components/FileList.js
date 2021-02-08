@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import PropTypes from 'prop-types'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEdit, faTrash, faTimes } from '@fortawesome/free-solid-svg-icons'
@@ -10,21 +10,39 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
   const [value, setValue] = useState('')
   const enterPressed = useKeyPress(13)
   const escPressed = useKeyPress(27)
-  const closeSearch = () => {
+  const closeSearch = (editItem) => {
     setEditStatus(false)
     setValue('')
+    // if we are editing a newly created file, we should delete this file
+    if (editItem.isNew) {
+      onFileDelete(editItem.id)
+    }
   }
   useEffect(() => {
-    if (enterPressed && editStatus) {
-      const editItem = files.find(file => file.id === editStatus)
+    const editItem = files.find(file => file.id === editStatus)
+    if (enterPressed && editStatus && value.trim() !== '') {
       onSaveEdit(editItem.id, value)
       setEditStatus(false)
       setValue('')
     }
     if (escPressed && editStatus) {
-      closeSearch()
+      closeSearch(editItem)
     }
   })
+  useEffect(() => {
+    const newFile = files.find(file => file.isNew)
+    console.log(newFile)
+    if (newFile) {
+      setEditStatus(newFile.id)
+      setValue(newFile.title)
+    }
+  }, [files])
+  let inputRef = useRef(null);
+  useEffect(() => {
+    if (editStatus) {
+      inputRef.current.focus()
+    }
+  }, [editStatus])
   return (
     <ul className="list-group list-group-flush file-list">
       {
@@ -34,7 +52,7 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
             key={file.id}
           >
             { 
-              (file.id !== editStatus) &&  
+              (file.id !== editStatus && !file.isNew) &&  
               <>
                 <span className="col-2">
                   <FontAwesomeIcon
@@ -71,17 +89,19 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
               </>
             }
             {
-              (file.id === editStatus) &&
+              ((file.id === editStatus) || file.isNew) &&
               <>
                 <input 
                   className="form-control col-10"
                   value={value}
+                  ref={inputRef}
+                  placeholder="请输入文件名称"
                   onChange={(e) => { setValue(e.target.value) }}
                 />
                 <button 
                   type="button"
                   className="icon-button col-2"
-                  onClick={closeSearch}
+                  onClick={() => closeSearch(file)}
                 >
                   <FontAwesomeIcon
                     size="lg"
