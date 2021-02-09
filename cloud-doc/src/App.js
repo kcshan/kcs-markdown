@@ -14,15 +14,16 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import "easymde/dist/easymde.min.css"
 
+const fs = window.require('fs')
+console.dir(fs)
+
 function App() {
   const [files, setFiles] = useState(flattenArr(defaultFiles))
-  console.log(files)
   const [activeFileID, setActiveFileID] = useState('')
   const [openedFileIDs, setOpenedFileIDs] = useState([])
   const [unsavedFileIDs, setUnsavedFileIDs] = useState([])
   const [searchedFiles, setSearchedFiles] = useState([]) 
   const filesArr = objToArr(files)
-  console.log(filesArr)
   const fileClick = (fileID) => {
     // set current active file
     setActiveFileID(fileID)
@@ -69,7 +70,6 @@ function App() {
   const fileSearch = (keyword) => {
     // filter out the new files based on the keyword
     const newFiles = filesArr.filter(file => file.title.includes(keyword))
-    console.log(newFiles)
     setSearchedFiles(newFiles)
   }
   const createNewFile = () => {
