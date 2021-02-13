@@ -19,6 +19,14 @@ import "easymde/dist/easymde.min.css"
 const { join } = window.require('path')
 const { remote } = window.require('electron')
 
+// const Store = window.require('electron-store')
+// debugger
+// console.log(Store)
+// const store = new Store()
+// store.set('name', 'kcs')
+// console.log(store.get('name'))
+
+
 function App() {
   const [files, setFiles] = useState(flattenArr(defaultFiles))
   const [activeFileID, setActiveFileID] = useState('')
@@ -109,6 +117,12 @@ function App() {
         setUnsavedFileIDs(unsavedFileIDs.filter(id => id !== activeFile.id))
       })
   }
+  const test = () => {
+    const Store = window.require("electron-store")
+    debugger
+    const store = new Store({ watch: true })
+    debugger
+  }
 
   return (
     <div className="App container-fluid px-0">
@@ -169,6 +183,12 @@ function App() {
                 colorClass="btn-success"
                 icon={faSave}
                 onBtnClick={saveCurrentFile}
+              />
+              <BottomBtn 
+                text="测试"
+                colorClass="btn-success"
+                icon={faSave}
+                onBtnClick={test}
               />
             </>
           }
